@@ -53,6 +53,8 @@ def classify_email(email_content: str):
         except ValueError:
             action_score = 0.0
 
+        print(action_score)
+
         if action_score > 0.6:
             categoria = "PRODUTIVO"
             resposta = (
