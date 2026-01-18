@@ -1,72 +1,73 @@
-from transformers import pipeline
-import torch
 import logging
+import os
+import requests
+from dotenv import load_dotenv
 
-classifier = pipeline(
-    "zero-shot-classification",
-    model="MoritzLaurer/mDeBERTa-v3-base-mnli-xnli",
-    device=0 if torch.cuda.is_available() else -1
-)
+load_dotenv()
+
+API_TOKEN = os.getenv("HF_TOKEN")
+if not API_TOKEN:
+    raise ValueError("HF_TOKEN não encontrado. Coloque no .env ou variáveis de ambiente.")
+
+API_URL = "https://router.huggingface.co/hf-inference/models/MoritzLaurer/mDeBERTa-v3-base-mnli-xnli"
+
+headers = {
+    "Authorization": f"Bearer {API_TOKEN}",
+    "Content-Type": "application/json"
+}
+
 
 def classify_email(email_content: str):
-    if not classifier:
-        return "Erro", "Modelo de IA não disponível.", ""
-
-    critical_keywords = [
-        "solicitação", "pedido", "suporte", "ajuda", "dúvida", "problema", "erro",
-        "preciso", "necessito", "gostaria", "poderia", "status", "extrato", "fatura",
-        "boleto", "senha", "acesso", "login", "conta", "cancelar", "reembolso", "troca",
-        "devolução", "não consigo", "urgente", "parado", "bloqueado", "estornar"
-    ]
 
     email_lower = email_content.lower()
 
-    for keyword in critical_keywords:
-        if keyword in email_lower:
-            return (
-                "PRODUTIVO",
-                "Olá, obrigado pelo seu e-mail. Estamos analisando sua solicitação e retornaremos em breve com uma atualização."
-            )
-    candidate_labels = [
-        "saudação, cortesia, agradecimento, elogio ou encerramento sem ação",
-        "solicitação de ajuda, problema técnico, dúvida, pedido ou necessidade de intervenção"
+    critical_keywords = [
+        "erro", "bug", "falha", "não consigo", "problema técnico",
+        "fatura", "senha", "estorno", "cancelar"
     ]
 
-    hypothesis_template = "Este e-mail é sobre {}."
+    for keyword in critical_keywords:
+        if keyword in email_lower:
+            return "PRODUTIVO", "Olá! Recebemos sua solicitação técnica."
+
+    candidate_labels = ["agradecimento ou elogio", "duvida ou suporte", "saudacao"]
+    payload = {
+        "inputs": email_content,
+        "parameters": {
+            "candidate_labels": candidate_labels,
+            "multi_label": True
+        }
+    }
 
     try:
-        result = classifier(
-            email_content,
-            candidate_labels=candidate_labels,
-            multi_label=True,
-            hypothesis_template=hypothesis_template
-        )
+        response = requests.post(API_URL, headers=headers, json=payload, timeout=30)
+        result = response.json()
 
-        # probabilities_str = "\n".join(
-        #     f"- {label.split(',')[0].strip().capitalize()}: {score:.2%}"
-        #     for label, score in zip(result['labels'], result['scores'])
-        # )
+        if response.status_code != 200:
+            logging.error(f"Erro da API: {result}")
+            return "Erro", "IA indisponível no momento."
 
-        try:
-            action_index = result['labels'].index(candidate_labels[1])
-            action_score = result['scores'][action_index]
-        except ValueError:
-            action_score = 0.0
+        if isinstance(result, list):
+            result = result[0]
 
-        if action_score > 0.6:
-            categoria = "PRODUTIVO"
-            resposta = (
-                "Olá, obrigado pelo contato. Recebemos sua solicitação e "
-                "nossa equipe já está analisando para retornar o mais breve possível."
-            )
+        if 'label' in result:
+            top_label = result['label']
+            top_score = result['score']
+
+        elif 'labels' in result:
+            top_label = result['labels'][0]
+            top_score = result['scores'][0]
         else:
-            categoria = "IMPRODUTIVO"
-            resposta = (
-                "Olá! Muito obrigado pela mensagem positiva. "
-                "Ficamos felizes em ajudar. Tenha um ótimo dia! 😊"
-            )
-        return categoria, resposta
+            logging.error(f"Formato desconhecido: {result}")
+            return "Erro", "Resposta da IA em formato inesperado."
+
+        print(f"IA identificou: {top_label} (Confiança: {top_score:.2f})")
+
+        if "duvida" in top_label or "solicitacao" in top_label:
+            return "PRODUTIVO", "Recebemos sua solicitação e nossa equipe já está analisando."
+        else:
+            return "IMPRODUTIVO", "Obrigado pela sua mensagem! Tenha um ótimo dia."
 
     except Exception as e:
-        logging.error(f"Erro na classificação zero-shot: {e}")
-        return "Erro", "Ocorreu um erro ao processar o e-mail.", ""
+        logging.error(f"Falha crítica: {e}")
+        return "Erro", "Falha ao processar e-mail."
