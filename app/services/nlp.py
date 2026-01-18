@@ -1,8 +1,15 @@
 import spacy
 
-nlp = spacy.load("pt_core_news_sm")
+_nlp = None
+
+def get_nlp():
+    global _nlp
+    if _nlp is None:
+        _nlp = spacy.load("pt_core_news_sm")
+    return _nlp
 
 def preprocess(text: str) -> str:
+    nlp = get_nlp()
     doc = nlp(text.lower())
     tokens = [
         token.lemma_
