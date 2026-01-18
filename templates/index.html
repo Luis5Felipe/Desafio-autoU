@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classificador de Documentos</title>
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Classifique seus documentos</h1>
+            <p>Envie um arquivo ou digite um texto para descobrir sua categoria e receber uma resposta automática sugerida.</p>
+        </div>
+
+        <div class="main-content">
+            <div class="error" id="error"></div>
+
+            <div class="upload-area" id="uploadArea">
+                <span class="upload-icon">📤</span>
+                <div class="upload-text">
+                    <h3>Arraste e solte seu arquivo</h3>
+                </div>
+                <div class="upload-formats">Formatos aceitos: .txt, .pdf</div>
+                <div class="file-name" id="fileName"></div>
+                <input type="file" id="fileInput" class="file-input" accept=".txt,.pdf">
+            </div>
+
+            <div class="divider">
+                <span>ou</span>
+            </div>
+
+            <div class="text-input-section">
+                <h3>insira o texto diretamente</h3>
+                <textarea id="textInput" placeholder="Cole ou digite seu texto aqui para análise..."></textarea>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Analisando seu documento...</p>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-secondary" id="newAnalysisBtn">Nova Análise</button>
+                <button class="btn btn-primary" id="processBtn">
+                    <span>✈️</span> Processar Documento
+                </button>
+            </div>
+
+            <div class="results" id="results">
+                <div class="category-result">
+                    <div class="category-badge">
+                        <div class="category-icon">✓</div>
+                        <div>
+                            <div class="category-label">Categoria atribuída</div>
+                            <div class="category-name" id="categoryName">Produtivo</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="suggested-response">
+                    <h5>✨ Resposta Sugerida</h5>
+                    <p id="responseText">Obrigado pelo seu contato! Sua solicitação foi recebida e está sendo processada. Nossa equipe entrará em contato em até 24 horas úteis para dar continuidade ao seu pedido.</p>
+                    <div class="analysis-status">
+                        <span class="status-dot"></span>
+                        Análise concluída com sucesso
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="static/script.js"></script>
+</body>
+</html>

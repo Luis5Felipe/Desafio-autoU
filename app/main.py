@@ -1,11 +1,18 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, Request
 from fastapi import UploadFile, File, Form, HTTPException
 from app.schemas import ClassificationResponse
 from app.services.file_reader import read_txt, read_pdf
 from app.services.nlp import preprocess
 from app.services.classifier import classify_email
-
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 app = FastAPI(title="Classificador de Emails")
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
+
+@app.get("/")
+async def read_root(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 @app.post("/api/v1/classificar", response_model=ClassificationResponse)
 async def classificar_email(
