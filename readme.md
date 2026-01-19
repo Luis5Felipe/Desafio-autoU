@@ -1,100 +1,90 @@
-# Classificador de Emails
+# Classificador de E-mails Inteligente
 
-Projeto simples de classificação de e-mails como PRODUTIVO ou IMPRODUTIVO, usando FastAPI, Transformers e NLP (Spacy).
-Aceita texto direto ou arquivos .txt e .pdf para análise.
+Este projeto é uma ferramenta de triagem automática de e-mails desenvolvida com **FastAPI**. Ele classifica mensagens como **PRODUTIVO** (mensagens que requerem ação ou suporte técnico) ou **IMPRODUTIVO** (saudações, agradecimentos e mensagens de cortesia).
 
-Tecnologias Utilizadas
+A solução utiliza uma abordagem híbrida: **Heurística de Palavras-Chave** para detecção imediata e **Inteligência Artificial (NLP)** para análise de contexto profundo.
 
-- Python 3.10+
-- FastAPI
-- PyPDF2
-- Transformers-Huggingface-hub
-- Spacy (pt_core_news_sm)
+---
 
-# Como Executar Localmente
+## Tecnologias Utilizadas
 
-### Clone o repositório
-```
-git clone <URL_DO_REPOSITORIO>
-cd nome-do-projeto
-```
+- **FastAPI**: Framework web moderno e de alta performance.
+- **spaCy (pt_core_news_sm)**: Processamento de Linguagem Natural e lematização em português.
+- **Hugging Face Inference API**: Modelo `mDeBERTa-v3-base-mnli-xnli` para classificação Zero-Shot.
+- **PyPDF2**: Biblioteca para extração de texto de arquivos PDF.
+- **Python-dotenv**: Gerenciamento seguro de variáveis de ambiente e tokens.
+- **Deploy**: Render
 
-### Crie e ative um ambiente virtual
+---
 
-```
-python -m venv .venv
-```
-
-### windows 
-
-````
-.venv\Scripts\activate
-````
-
-### Linux
-
-````
-source .venv/bin/activate
-````
-
-### Instale as dependências
-
-````
-pip install -r requirements.txt
-python -m spacy download pt_core_news_sm
-````
-
-### Execute a aplicação
-
-```
-uvicorn app.main:app --reload
-```
-
-### Acesse a aplicação
-
-```
-http://127.0.0.1:8000/
-```
-
-# Estrutura do Projeto
-
-````
-.
-├── app/
-│   ├── main.py            # FastAPI app principal
-│   ├── services/
-│   │   ├── classifier.py  # Função classify_email
-│   │   ├── file_reader.py # Funções read_txt e read_pdf
-│   │   └── nlp.py         # Função preprocess
-│   └── schemas.py         # Pydantic ClassificationResponse
-├── static/                # CSS, JS e imagens
-├── templates/             # Arquivos HTML (index.html)
-├── requirements.txt       # Dependências do projeto
-└── README.md              # Documentação
-````
-# Exemplos de Uso
-
-Texto enviado pelo formulário da página web:
-````text
-"Olá, estou com problemas para acessar minha conta e preciso de ajuda urgente."
-````
-### Resposta esperada
+## Exemplos de Resposta
 
 ````json
 {
   "categoria": "PRODUTIVO",
-  "resposta_sugerida": "Olá, obrigado pelo contato. Recebemos sua solicitação e nossa equipe já está analisando para retornar o mais breve possível."
+  "resposta_sugerida": "Recebemos sua dúvida/suporte e nossa equipe já está analisando."
 }
 ````
 
-## Exemplo 2: Arquivo PDF ou TXT
+````json
+{
+  "categoria": "IMPRODUTIVO",
+  "resposta_sugerida": "Obrigado pela sua mensagem!"
+}
+````
 
-- Faça upload de um arquivo .txt ou .pdf pelo formulário.
-- O endpoint /api/v1/classificar retorna JSON com categoria e resposta sugerida
+# Estrutura do Projeto
 
-# Observações
+````tree
+.
+├── app/
+│   ├── main.py            # Endpoints da API e rotas do sistema
+│   ├── schemas.py         # Modelos de dados (Pydantic)
+│   └── services/
+│       ├── classifier.py  # Lógica híbrida (Keywords + IA via Requests)
+│       ├── nlp.py         # Pré-processamento e lematização com spaCy
+│       └── file_reader.py # Extração de texto de PDFs e TXTs
+├── static/                # Interface (CSS, JS)
+├── templates/             # index.html (Front-end)
+├── .env                   # Variáveis sensíveis (não enviado ao Git)
+└── requirements.txt       # Dependências do projeto
+````
 
-- Apenas arquivos .txt e .pdf são suportados.
-- O classificador utiliza Zero-Shot Classification, então os resultados podem variar conforme o texto.
-- Para textos muito longos, o processamento pode demorar um pouco.
+## Como Executar Localmente
 
+### 1. Requisitos
+* Python 3.10 ou superior.
+* Token de acesso (Read) do [Hugging Face](https://huggingface.co/settings/tokens).
+
+### 2. Instalação
+
+```bash
+# Clone o repositório
+git clone <URL_DO_REPOSITORIO>
+cd nome-do-projeto
+
+# Crie e ative o ambiente virtual
+python -m venv .venv
+# Windows: .venv\Scripts\activate
+# Linux/Mac: source .venv/bin/activate
+
+# Instale as dependências
+pip install -r requirements.txt
+python -m spacy download pt_core_news_sm
+````
+
+### 3. Configuração (.env)
+
+Crie um arquivo chamado .env na raiz do projeto e adicione seu token:
+Snippet de código
+
+```bash
+HF_TOKEN=seu_token_aqui
+```
+
+### 4. Execução
+
+```Bash
+uvicorn app.main:app --reload
+Acesse em: http://127.0.0.1:8000
+```
