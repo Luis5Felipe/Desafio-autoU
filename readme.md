@@ -17,7 +17,15 @@ A solução utiliza uma abordagem híbrida: **Heurística de Palavras-Chave** pa
 
 ---
 
-## Exemplos de Resposta
+## Exemplos de Resposta e emails 
+
+````text
+Olá, Poderiam enviar o extrato bancário da conta PJ referente ao período de 01/12 a 31/12?
+Precisamos do documento para fechamento contábil.
+
+Obrigado.
+````
+
 
 ````json
 {
@@ -25,6 +33,15 @@ A solução utiliza uma abordagem híbrida: **Heurística de Palavras-Chave** pa
   "resposta_sugerida": "Recebemos sua dúvida/suporte e nossa equipe já está analisando."
 }
 ````
+
+````text
+Gostaria apenas de agradecer pelo atendimento prestado ontem.
+Fiquei muito satisfeito com a atenção da equipe.
+
+Atenciosamente,
+Carlos
+````
+
 
 ````json
 {
